@@ -1,0 +1,32 @@
+#include <zephyr/dt-bindings/i2c/i2c.h>
+
+/* Lab 15 reuses this overlay UNCHANGED from Lab 12/13 -- same AHT20+BMP280
+ * wiring on &i2c0, no new hardware. This lab only actually talks to the
+ * AHT20 half of the combo module (see remote/src/main.c) -- BMP280 is
+ * left unused but the i2c0 bus setup itself is identical either way. */
+
+/* ipc0 shared-memory-size must match the M55 overlay in boards/ exactly. */
+&ipc0 {
+	shared-memory-size = <0x400>;
+};
+
+/*
+ * AHT20+BMP280 combo module wired to SoC GPIO3/GPIO4 on &i2c0 -- see
+ * Lab 12's doc for the full pinctrl-label discovery story
+ * (i2c0_ms_scl / i2c0_ms_sda, no route-letter suffix, independent of
+ * SPI0/UART0/UART1's shared pin group).
+ */
+&i2c0_ms_scl {
+	bias-pull-up;
+};
+
+&i2c0_ms_sda {
+	bias-pull-up;
+};
+
+&i2c0 {
+	status = "okay";
+	pinctrl-0 = <&i2c0_ms_scl &i2c0_ms_sda>;
+	pinctrl-names = "default";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+};

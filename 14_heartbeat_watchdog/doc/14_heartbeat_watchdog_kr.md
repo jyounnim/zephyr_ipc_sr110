@@ -121,7 +121,7 @@ Uart_Cmd_Task                                  |            -> WD_TIMEOUT, trips
 | DC | SoC GPIO18 (J24 4번 핀) | 위와 동일하게 레벨시프터 경유 |
 | BLK(백라이트) | 3.3V 또는 별도 GPIO | 고정 3.3V 연결도 가능 |
 
-**주의**: SPI0을 켜면 M55의 UART1 콘솔(GPIO23/24 공유)을 꺼야 합니다. 이 랩의 `lab/prj.conf`에 `CONFIG_UART_CONSOLE=n`, `CONFIG_CONSOLE=n`이 이미 설정되어 있습니다. M55 콘솔을 보려면 반드시 **USB-C 직결(J14, 115200bps)** 방법을 사용하세요 — J25 헤더 방식은 이 랩에서 쓸 수 없습니다.
+**주의**: SPI0을 켜면 M55의 유일한 UART(UART1, GPIO23/24)를 꺼야 합니다. J14 USB-C 커넥터와 J25 헤더는 서로 다른 두 UART가 아니라, **물리적으로 동일한 UART1 신호**를 온보드 USB-시리얼 브리지(J14)와 외부 컨버터용 헤더(J25)라는 서로 다른 경로로 꺼내는 것뿐입니다. 그래서 UART1을 끄면 J14로도 J25로도 M55의 로그를 볼 수 없습니다 — 이 랩부터 M55는 시리얼 콘솔을 아예 포기하고, **TFT 화면이 M55 쪽 상태를 확인하는 유일한 수단**입니다(Lab 11에서 확립된 설계, 아래 참고 절). 이 랩의 `lab/prj.conf`에 이미 `CONFIG_UART_CONSOLE=n`, `CONFIG_CONSOLE=n`이 설정되어 있고, M55 코드에 남아있는 `LOG_INF`/`printk` 호출은 디버깅 편의를 위해 그대로 둔 것일 뿐 실제로는 어디로도 출력되지 않습니다.
 
 ### 조작자 커맨드 입력 (M4 콘솔 UART, 새 배선 없음)
 
@@ -157,7 +157,7 @@ west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/14_heartbeat_watc
 
 ## 실행 및 결과 확인
 
-1. M4 콘솔(J24, 230400bps)과 M55 콘솔(J14 USB-C, 115200bps)을 모두 열어둡니다.
+1. M4 콘솔(J24, 230400bps)을 열어둡니다. M55는 이 랩부터 시리얼 콘솔이 없으므로(위 핀 연결 절의 주의 참고) 별도로 열 M55 콘솔은 없습니다 — M55 쪽 상태는 TFT 화면으로 확인합니다.
 2. 두 코어 모두 플래시 후 리셋하면, M4는 300ms마다 heartbeat를 보내기 시작하고 M55의 TFT에는 처음엔 회색 "WAIT", 첫 heartbeat 수신 후 곧바로 초록색 "OK"가 표시됩니다.
 3. M4 콘솔에 `3`을 입력해 상태를 확인합니다 — `[M4] status: RUNNING (heartbeat active)`가 출력되어야 합니다.
 4. M4 콘솔에 `1 5`를 입력해 5초간 heartbeat를 일시정지합니다 — `[M4] heartbeat PAUSED for 5s (simulated hang) -- watch M55's TFT`가 출력됩니다. M55의 TFT를 지켜보면, 마지막 heartbeat로부터 약 1200ms(`WATCHDOG_TIMEOUT_MS`) 후 상태가 빨간색 "TIMEOUT"으로 바뀌고 TRIPS 카운터가 1 증가합니다.

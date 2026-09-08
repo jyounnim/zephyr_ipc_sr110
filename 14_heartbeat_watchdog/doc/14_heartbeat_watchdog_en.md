@@ -121,7 +121,7 @@ Uart_Cmd_Task                                  |            -> WD_TIMEOUT, trips
 | DC | SoC GPIO18 (J24 pin 4) | Same level-shifter routing as above |
 | BLK (backlight) | 3.3V or a dedicated GPIO | Tying it directly to 3.3V also works |
 
-**Note**: enabling SPI0 requires disabling M55's UART1 console (it shares GPIO23/24). This lab's `lab/prj.conf` already sets `CONFIG_UART_CONSOLE=n` and `CONFIG_CONSOLE=n`. To view M55's console, you must use the **direct USB-C connection (J14, 115200bps)** — the J25 header method cannot be used in this lab.
+**Caution**: turning on SPI0 requires turning off M55's only UART (UART1, shared with GPIO23/24). The J14 USB-C connector and the J25 header are not two separate UARTs -- they are two different physical paths (an onboard USB-serial bridge for J14, an external converter header for J25) exposing the exact same UART1 signal. So disabling UART1 silences BOTH J14 and J25 -- from this lab onward, M55 gives up its serial console entirely, and **the TFT screen is the only way to check M55's state** (the design established in Lab 11, see the Notes section). This lab's `lab/prj.conf` already sets `CONFIG_UART_CONSOLE=n` and `CONFIG_CONSOLE=n`, and the `LOG_INF`/`printk` calls left in the M55 source are kept only for reading later if the console is ever re-enabled for debugging -- they don't actually go anywhere right now.
 
 ### Operator Command Input (M4 console UART, no new wiring)
 
@@ -157,7 +157,7 @@ west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/14_heartbeat_watc
 
 ## Running It and Checking the Results
 
-1. Open both the M4 console (J24, 230400bps) and the M55 console (J14 USB-C, 115200bps).
+1. Open M4's console (J24, 230400bps). M55 has no serial console from this lab onward (see the Caution note above), so there is no separate M55 console to open -- check M55's state on the TFT screen instead.
 2. After flashing and resetting both cores, M4 begins sending a heartbeat every 300ms, and M55's TFT initially shows a gray "WAIT", switching to green "OK" the moment the first heartbeat arrives.
 3. Type `3` into the M4 console to check status — it should print `[M4] status: RUNNING (heartbeat active)`.
 4. Type `1 5` into the M4 console to pause heartbeats for 5 seconds — it prints `[M4] heartbeat PAUSED for 5s (simulated hang) -- watch M55's TFT`. Watching M55's TFT, roughly 1200ms (`WATCHDOG_TIMEOUT_MS`) after the last heartbeat, the status turns red "TIMEOUT" and the TRIPS counter increments by 1.

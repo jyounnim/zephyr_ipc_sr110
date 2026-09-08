@@ -121,7 +121,7 @@ This lab's code never touches the BMP280 side of the same combo module, but the 
 | DC | SoC GPIO18 (J24 pin 4) | Same level-shifter routing as above |
 | BLK (backlight) | 3.3V or a dedicated GPIO | Tying it directly to 3.3V also works |
 
-**Note**: enabling SPI0 requires disabling M55's UART1 console (it shares GPIO23/24). This lab's `lab/prj.conf` already sets `CONFIG_UART_CONSOLE=n` and `CONFIG_CONSOLE=n`. To view M55's console, you must use the **direct USB-C connection (J14, 115200bps)**.
+**Caution**: turning on SPI0 requires turning off M55's only UART (UART1, shared with GPIO23/24). The J14 USB-C connector and the J25 header are not two separate UARTs -- they are two different physical paths (an onboard USB-serial bridge for J14, an external converter header for J25) exposing the exact same UART1 signal. So disabling UART1 silences BOTH J14 and J25 -- from this lab onward, M55 gives up its serial console entirely, and **the TFT screen is the only way to check M55's state** (the design established in Lab 11, see the Notes section). This lab's `lab/prj.conf` already sets `CONFIG_UART_CONSOLE=n` and `CONFIG_CONSOLE=n`, and the `LOG_INF`/`printk` calls left in the M55 source are kept only for reading later if the console is ever re-enabled for debugging -- they don't actually go anywhere right now.
 
 ### Operator Command Input (M4 console UART, no new wiring)
 
@@ -155,7 +155,7 @@ west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/15_low_power_sync
 
 ## Running It and Checking the Results
 
-1. Open both the M4 console (J24, 230400bps) and the M55 console (J14 USB-C, 115200bps).
+1. Open M4's console (J24, 230400bps). M55 has no serial console from this lab onward (see the Caution note above), so there is no separate M55 console to open -- check M55's state on the TFT screen instead.
 2. After flashing and resetting both cores, M55's TFT initially shows a gray "WAIT".
 3. Right after boot, M4 sends the initial state (ABOVE or BELOW) to M55 based on its first AHT20 reading — the TFT immediately switches to green (BELOW) or red (ABOVE), and TEMP/EVENTS are populated.
 4. Type `2` into the M4 console to check the current state — it prints something like `[M4] status: temp=26.500C threshold=28.000C state=BELOW events_sent=1`.

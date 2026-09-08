@@ -1,0 +1,51 @@
+#include <zephyr/dt-bindings/i2c/i2c.h>
+
+/* ipc0 shared-memory-size must match the M55 overlay in boards/ exactly. */
+&ipc0 {
+	shared-memory-size = <0x400>;
+};
+
+/*
+ * AHT20+BMP280 combo module wired to SoC GPIO3/GPIO4 -- per the user,
+ * NOT the shared &i2c1 bus every other lab in this curriculum uses for
+ * onboard peripherals (mc3479, gpio_exp0). This SoC has three I2C
+ * controllers in the base dtsi (i2c0 @ 0x50312000, i2c1 @ 0x50313000,
+ * i2c2 @ 0x50314000 -- the last one is commented "I2C slave" in the
+ * SoC dtsi, so it's not usable here). GPIO3/4 is assumed to be i2c0's
+ * pin route.
+ *
+ * Pinctrl node labels CONFIRMED (per user-provided reference overlay):
+ * i2c0_ms_scl / i2c0_ms_sda -- no route-letter suffix. Unlike I2C1,
+ * which has two alternate pin groups distinguished by a "_a"/"_b"
+ * suffix (this curriculum uses i2c1_ms_scl_b / i2c1_ms_sda_b), I2C0 has
+ * exactly one fixed pin group on the SoC's own LPS_GEAR1 mux slot, so
+ * there's no suffix to guess. i2c0 ships status = "disabled" with no
+ * default pinctrl-0, so both the bus and the pin bias must be set here.
+ * This pin group is independent of SPI0/UART0/UART1's shared group, so
+ * there's no console conflict here (unlike Lab 11/12's TFT on SPI0).
+ *
+ * No child sensor devicetree nodes are declared here on purpose --
+ * both AHT20 (fixed I2C address) and BMP280 (address depends on how
+ * the module's SDO pin is wired, 0x76 or 0x77) are talked to with raw
+ * i2c_* calls at runtime instead of the Zephyr sensor subsystem, so
+ * main.c can scan for each sensor's actual address at boot rather than
+ * assuming a fixed one -- unlike a fixed-address board where each
+ * sensor is a child node with compatible/reg (e.g. aht20@38 { compatible
+ * = "aosong,aht20"; reg = <0x38>; };) and the address, once confirmed
+ * with a real I2C scan on hardware, is hardcoded into the devicetree.
+ * See main.c for why we chose runtime scanning over that.
+ */
+&i2c0_ms_scl {
+	bias-pull-up;
+};
+
+&i2c0_ms_sda {
+	bias-pull-up;
+};
+
+&i2c0 {
+	status = "okay";
+	pinctrl-0 = <&i2c0_ms_scl &i2c0_ms_sda>;
+	pinctrl-names = "default";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+};

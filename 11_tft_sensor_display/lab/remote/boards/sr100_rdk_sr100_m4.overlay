@@ -1,0 +1,16 @@
+/* ipc0 shared-memory-size must match the M55 overlay in boards/ exactly. */
+&ipc0 {
+	shared-memory-size = <0x400>;
+};
+
+/*
+ * Same accelerometer enable as Lab 09 -- the onboard MC3419 (labeled
+ * "mc3479" in the base board dts, on i2c1 @ 0x4c) defaults to
+ * status = "disabled" and must be re-enabled on the M4 side, since M4
+ * owns i2c1 in this curriculum (see the i2c1 disable in the M55 overlay).
+ * This lab polls with sensor_sample_fetch(), so the driver's own
+ * interrupt-trigger mode (and its int-gpios wiring) is not exercised.
+ */
+&mc3479 {
+	status = "okay";
+};

@@ -1,0 +1,97 @@
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/* ipc0 shared-memory-size must match the M4 overlay in remote/boards/ exactly. */
+&ipc0 {
+	shared-memory-size = <0x400>;
+};
+
+/*
+ * M4 and M55 physically share the same I2C1 bus (SCL/SDA pins) --
+ * i2c1_ms_scl_b / i2c1_ms_sda_b are identical in both dts files. M4 is
+ * the one driving the accelerometer in this lab, so i2c1 is disabled on
+ * the M55 side to avoid a bus-init conflict at boot (same pattern applied
+ * in every lab since Lab 01).
+ */
+&i2c1 {
+	status = "disabled";
+};
+
+&gpio_exp0 {
+	status = "disabled";
+};
+
+&ov02c10 {
+	status = "disabled";
+};
+
+/*
+ * ST7789V3 1.69" 240x280 color TFT on M55's SPI0.
+ *
+ * This is ported directly from `jyounnim/zephyr_display-sr110`'s Lab 06
+ * (`06_TFT_ST7789V3`), which was already brought up and hardware-verified
+ * standalone on this exact board -- see that lab's README/troubleshooting
+ * doc for the full bring-up story. The devicetree side here (custom
+ * "zds,st7789v" binding, pins, SPI frequency) is copied unchanged; only
+ * the console handling differs (see the ns16550_uart1 note below), since
+ * that lab is M55-only and this one runs M4 alongside it.
+ *
+ * NO Zephyr in-tree display driver is used -- see
+ * lab/dts/bindings/display/zds,st7789v.yaml and src/main.c, which talk to
+ * the panel with raw spi_write_dt() calls. This sidesteps the in-tree
+ * "sitronix,st7789v" driver's newer required "mipi-mode" devicetree
+ * property entirely (which this Zephyr version's binding demands but
+ * earlier revisions of this overlay didn't have set, causing a
+ * build failure).
+ *
+ * Write-only module (no MISO), but spi_mstr_miso is still routed in
+ * pinctrl-0 for consistency with the confirmed-working zephyr_display-sr110
+ * overlay. Native hardware CS (spi_mstr_cs pinctrl, no cs-gpios).
+ *
+ * IMPORTANT hardware conflict, confirmed from the schematic (J25 header):
+ *   GPIO23 = SPI_MSTR_MOSI / UART1_TX  <-- M55's own console TX pin
+ *   GPIO24 = SPI_MSTR_MISO / UART1_RX  <-- M55's own console RX pin
+ * SPI0's MOSI/MISO pins are physically the same pads as M55's UART1
+ * (ns16550_uart1, M55's console). Enabling SPI0 here therefore takes over
+ * the console pins. The standalone zephyr_display-sr110 lab reroutes its
+ * console to UART0's alternate pin group (uart0_tx_c/rx_c, GPIO44/45)
+ * instead -- but in THIS curriculum M4 already owns UART0 as its own
+ * console (see 00_course_overview), so M55 can't also claim it here.
+ * ns16550_uart1 is disabled below and left with no working console at
+ * all -- any status info M55 needs is rendered on the TFT instead (see
+ * src/main.c).
+ *
+ * ⚠️ LEVEL SHIFTER REQUIRED: SR110's SPI0/GPIO pads are a 1.8V I/O
+ * domain (confirmed against the SR110 RDK schematic, SC950-C01116-01
+ * RevE). This ST7789V3 module's IOVCC is 3.3V (VIH = 0.7 x IOVCC =
+ * 2.31V, which 1.8V doesn't reach) -- driving it directly produced a
+ * persistent black screen with no SPI-level error in the original
+ * bring-up. A bidirectional level shifter (confirmed working: TXS0108E)
+ * on all five signals -- SCLK, MOSI, CS, RST, DC -- is required. Keep
+ * spi-max-frequency conservative (4MHz here) if using a TXS0108E, since
+ * it's an auto-direction-sensing shifter not really meant for a fast
+ * continuously-toggling signal like SCLK; a dedicated unidirectional
+ * buffer (74LVC245, 74AHCT125, etc.) is the more correct choice.
+ */
+&ns16550_uart1 {
+	status = "disabled";
+};
+
+&spi0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+	pinctrl-0 = <&spi_mstr_mosi &spi_mstr_miso &spi_mstr_clk &spi_mstr_cs>;
+	pinctrl-names = "default";
+
+	st7789v_disp: st7789v@0 {
+		compatible = "zds,st7789v";
+		reg = <0>;
+		spi-max-frequency = <4000000>;
+		reset-gpios = <&gpioa 17 GPIO_ACTIVE_LOW>;  /* SoC GPIO17, J24 pin 3 - through level shifter */
+		dc-gpios = <&gpioa 18 GPIO_ACTIVE_HIGH>;    /* SoC GPIO18, J24 pin 4 - through level shifter */
+		width = <240>;
+		height = <280>;
+		x-offset = <0>;
+		y-offset = <20>;
+	};
+};

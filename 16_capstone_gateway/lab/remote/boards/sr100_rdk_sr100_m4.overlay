@@ -1,0 +1,35 @@
+#include <zephyr/dt-bindings/i2c/i2c.h>
+
+/* ipc0 shared-memory-size must match the M55 overlay in boards/ exactly. */
+&ipc0 {
+	shared-memory-size = <0x400>;
+};
+
+/*
+ * Env_Task's AHT20+BMP280 combo module -- IDENTICAL i2c0 setup to
+ * Lab 12/13/15. See those labs' docs for the full pinctrl rationale.
+ */
+&i2c0_ms_scl {
+	bias-pull-up;
+};
+
+&i2c0_ms_sda {
+	bias-pull-up;
+};
+
+&i2c0 {
+	status = "okay";
+	pinctrl-0 = <&i2c0_ms_scl &i2c0_ms_sda>;
+	pinctrl-names = "default";
+	clock-frequency = <I2C_BITRATE_STANDARD>;
+};
+
+/*
+ * Motion_Task's onboard MC3419 accelerometer (labeled "mc3479" in the base
+ * board dts, on i2c1 @ 0x4c) defaults to status = "disabled" in both the
+ * M4 and M55 base dts and must be explicitly re-enabled here -- confirmed
+ * during Lab 09 hardware testing, reused as-is in Lab 10.
+ */
+&mc3479 {
+	status = "okay";
+};

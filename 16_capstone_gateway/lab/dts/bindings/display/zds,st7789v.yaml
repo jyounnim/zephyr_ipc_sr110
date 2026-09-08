@@ -1,0 +1,49 @@
+description: |
+  ZDS custom binding for an ST7789V(3)-driven SPI TFT panel, talked to
+  directly by application code (no Zephyr in-tree display driver is
+  used). This node only exists so the panel's wiring (SPI bus/CS,
+  reset pin, D/C pin) and panel geometry live in the devicetree where
+  they belong, instead of being hardcoded in C.
+
+compatible: "zds,st7789v"
+
+include: spi-device.yaml
+
+properties:
+  reset-gpios:
+    type: phandle-array
+    required: true
+    description: Panel RESET pin (active low - asserting it holds the
+      controller in reset).
+
+  dc-gpios:
+    type: phandle-array
+    required: true
+    description: Data/Command select pin (active high = data byte(s)
+      follow, inactive = command byte follows).
+
+  width:
+    type: int
+    default: 240
+    description: Visible panel width in pixels.
+
+  height:
+    type: int
+    default: 280
+    description: Visible panel height in pixels.
+
+  x-offset:
+    type: int
+    default: 0
+    description: Horizontal offset into the ST7789's native 240x320
+      GRAM. Needed because many small ST7789 panels (this 1.69"
+      240x280 module included) only use a centered sub-window of the
+      controller's full addressable memory.
+
+  y-offset:
+    type: int
+    default: 20
+    description: Vertical offset into the ST7789's native 240x320
+      GRAM. 20 is the commonly documented value for 1.69" 240x280
+      ST7789V3 modules; adjust if your specific module's datasheet
+      says otherwise.

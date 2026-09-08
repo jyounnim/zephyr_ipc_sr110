@@ -417,6 +417,7 @@ T:23.5C         (red; "T:23.5C(bmp)" or "T:ERR" if AHT20 absent/failing)
 H:45.2%         (green; "H:N/A" or "H:ERR" if AHT20 absent/failing)
 P:1013.2hPa     (cyan; "P:N/A" or "P:ERR" if BMP280 absent/failing)
 ```
+<img width="323" height="483" alt="image" src="https://github.com/user-attachments/assets/ed9d0001-aba0-4451-a5c2-41493b72a8cf" />
 
 If you deliberately wiggle or disconnect the sensor module's wiring (e.g. briefly disconnecting
 the SDA line), you can watch the corresponding sensor's value switch to `ERR` within a few

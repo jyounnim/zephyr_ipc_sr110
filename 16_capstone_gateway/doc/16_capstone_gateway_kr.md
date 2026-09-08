@@ -197,6 +197,9 @@ west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/16_capstone_gatew
 7. M4 콘솔에 `4`를 입력합니다 — M4 콘솔에 `STATUS pushed to M55`가 출력되고, TFT 하단의 STATUS 줄이 `STATUS:#1 up=NNs` 형태로 갱신됩니다. `4`를 다시 입력하면 카운터가 `#2`로 올라갑니다.
 8. M4 콘솔에서 `1 <celsius>`/`2 <milli-g>`로 임계값을 바꿔보고, ENV/MOTION 배지가 새 임계값 기준으로 반응하는지 확인합니다.
 9. **워치독 동작 확인**: M4 콘솔에 `5 5`를 입력해 `Heartbeat_Task`를 5초간 일시정지시킵니다(M4와 M55는 한 칩 안의 두 코어일 뿐이라 M4만 따로 전원을 끊거나 리셋할 수 없으므로, Lab 14와 동일하게 송신 스레드만 멈추는 방식으로 하트비트 끊김을 재현합니다). 4초(`WATCHDOG_TIMEOUT_MS`) 후 TFT 워치독 배지가 빨강 "TIMEOUT"으로 바뀌고 TRIPS 카운트가 1 증가하는지 확인하세요. 5초가 지나면 하트비트가 자동으로 재개되어 배지가 다시 초록 "OK"로 돌아옵니다. `6`을 입력하면 일시정지를 즉시 취소하고 곧바로 재개할 수도 있습니다.
+    <img width="421" height="624" alt="image" src="https://github.com/user-attachments/assets/86cf102d-a5fd-4c25-bff7-1861cc38eeb6" />
+
+
 
 ## 정리
 

@@ -142,13 +142,18 @@ M4's overlay (`remote/boards/sr100_rdk_sr100_m4.overlay`) keeps only the `ipc0` 
 
 ## How to Build
 
-```bash
-# M55 (host)
-west build -b sr100_rdk/sr100/m55 labs/14_heartbeat_watchdog/lab
+Run these from the west workspace root (the directory that has `zephyr/` in it). **On SR110, the M4 image must be built first, and the M55 build then pulls that M4 binary in via `M4_BUILD` to package it together** — this ordering was established starting with Lab 12; skipping it means the final flash image ends up with no M4 firmware in it at all (see the M4_BUILD troubleshooting note referenced in earlier labs).
 
-# M4 (remote/client)
-west build -b sr100_rdk/sr100/m4 labs/14_heartbeat_watchdog/lab/remote
+```bash
+# 1) Build the M4 (remote) image first
+west build -p always -b sr100_rdk/sr100/m4 ./zephyr_ipc_sr110/14_heartbeat_watchdog/lab/remote -d m4
+
+# 2) Build the M55 (host) image -- pulls in the M4 binary built above via M4_BUILD
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/14_heartbeat_watchdog/lab -d m55 \
+    -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
+
+`M4_BUILD` is a path relative to the M55 build directory (`-d m55`). If `m4/` and `m55/` are sibling directories under the workspace root, `../m4` is correct.
 
 ## Running It and Checking the Results
 

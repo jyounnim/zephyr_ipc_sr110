@@ -142,13 +142,18 @@ M4 오버레이(`remote/boards/sr100_rdk_sr100_m4.overlay`)는 `ipc0` shared-mem
 
 ## 빌드 방법
 
-```bash
-# M55 (host)
-west build -b sr100_rdk/sr100/m55 labs/14_heartbeat_watchdog/lab
+west 워크스페이스 루트(`zephyr/`가 보이는 디렉터리)에서 실행합니다. **SR110은 M4 이미지를 먼저 빌드하고, M55를 빌드할 때 그 M4 바이너리를 `M4_BUILD`로 가져와 함께 패키징하는 순서를 반드시 지켜야 합니다** — Lab 12부터 확립된 규칙이며, 이 순서를 지키지 않으면 최종 flash 이미지에 M4 펌웨어가 아예 포함되지 않습니다(10장 트러블슈팅 참고).
 
-# M4 (remote/client)
-west build -b sr100_rdk/sr100/m4 labs/14_heartbeat_watchdog/lab/remote
+```bash
+# 1) M4 (remote) 이미지 먼저 빌드
+west build -p always -b sr100_rdk/sr100/m4 ./zephyr_ipc_sr110/14_heartbeat_watchdog/lab/remote -d m4
+
+# 2) M55 (host) 이미지 빌드 -- M4_BUILD로 위에서 만든 M4 바이너리를 가져와 함께 패키징
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/14_heartbeat_watchdog/lab -d m55 \
+    -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
+
+`M4_BUILD`는 M55 빌드 디렉터리(`-d m55`) 기준 상대 경로입니다. `m4/`, `m55/`가 워크스페이스 루트 아래 형제 디렉터리인 배치라면 `../m4`가 맞습니다.
 
 ## 실행 및 결과 확인
 

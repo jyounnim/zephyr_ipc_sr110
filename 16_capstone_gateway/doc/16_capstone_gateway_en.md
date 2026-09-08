@@ -197,6 +197,8 @@ west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/16_capstone_gatew
 7. Type `4` into M4's console -- M4's console prints `STATUS pushed to M55`, and the STATUS line at the bottom of the TFT updates to something like `STATUS:#1 up=NNs`. Typing `4` again bumps the counter to `#2`.
 8. Change the thresholds from M4's console with `1 <celsius>`/`2 <milli-g>`, and confirm the ENV/MOTION badges react against the new thresholds.
 9. **Checking the watchdog**: type `5 5` into M4's console to pause `Heartbeat_Task` for 5 seconds (M4 and M55 are just two cores on one chip, so M4 can't be power-cycled or reset on its own -- as in Lab 14, only the sending thread is paused to simulate the heartbeat going silent). After 4 seconds (`WATCHDOG_TIMEOUT_MS`), confirm the TFT's watchdog badge turns red "TIMEOUT" and the TRIPS count increments by 1. Once the 5 seconds elapse, the heartbeat resumes automatically and the badge returns to green "OK". Typing `6` cancels the pause and resumes immediately instead of waiting it out.
+    <img width="421" height="624" alt="image" src="https://github.com/user-attachments/assets/a963f07d-c4cf-4d7b-9181-8bcce15cf355" />
+
 
 ## Summary
 

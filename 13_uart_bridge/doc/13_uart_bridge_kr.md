@@ -341,6 +341,8 @@ west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/13_uart_bridge/la
    - `3 0` → 그 줄이 다시 사라지는지 확인
    - `9` (정의되지 않은 커맨드) → M4 콘솔에 `[M4] unknown command: "9" (...)`가 즉시 출력되고, M55로는 아무것도 전송되지 않는지 확인 (M55 로그에 아무 반응이 없어야 정상)
    - `4 1` → `periodic avg ...` 로그가 다시 찍히기 시작하는지 확인
+  <img width="435" height="605" alt="image" src="https://github.com/user-attachments/assets/abc31bfe-647d-4d28-b5d6-7f7f25d5ecaf" />
+
 
    만약 아무 숫자를 입력해도 M4 콘솔에 `unknown command` 메시지조차 나오지 않는다면, 문제는 커맨드 파싱이 아니라 그 앞단(터미널 → `uart_poll_in()`) 어딘가에 있다는 뜻입니다. 터미널 프로그램의 흐름 제어(flow control) 설정이 `none`인지, 라인엔딩이 CR/LF 중 하나로는 실제로 나가고 있는지 확인하세요.
 

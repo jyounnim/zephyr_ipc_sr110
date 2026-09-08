@@ -323,6 +323,15 @@ Z:986         (노란색)
 이 문서에 기술된 전체 구성(M4 가속도계 → mbox → M55 raw-SPI ST7789V3 렌더링, mbox
 콜백→큐→`Display_Task` 워커 스레드 연동 포함)은 실물 보드에서 정상 동작을 확인했습니다.
 
+## 참고 자료 — 이식 원본
+
+이 랩의 디스플레이 쪽(devicetree 바인딩, raw SPI 드라이버, 레벨 시프터/FIFO 노하우)은
+같은 보드(SR110)에서 이미 하드웨어까지 검증된 별도 저장소
+[`jyounnim/zephyr_display-sr110`](https://github.com/jyounnim/zephyr_display-sr110)의
+`06_TFT_ST7789V3` 랩에서 가져왔습니다. 화면 오프셋, MADCTL 색상/회전, 초기화 실패 등
+더 자세한 트러블슈팅은 그 저장소의 `06_TFT_ST7789V3_TROUBLESHOOTING_KR.md`를
+참고하세요.
+
 ---
 
 문제가 발생했다면 → 이 랩의 트러블슈팅 문서(추후 작성 예정) 또는

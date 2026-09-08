@@ -328,6 +328,14 @@ The full setup described in this document (M4 accelerometer -> mbox -> M55 raw-S
 rendering, including the mbox callback -> queue -> `Display_Task` worker-thread wiring) has
 been confirmed working on real hardware.
 
+## Reference — ported from
+
+This lab's display side (devicetree binding, raw SPI driver, level-shifter/FIFO know-how) was
+ported from a separate repository already hardware-verified on this exact board (SR110):
+[`jyounnim/zephyr_display-sr110`](https://github.com/jyounnim/zephyr_display-sr110)'s
+`06_TFT_ST7789V3` lab. For more detailed troubleshooting (screen offset, MADCTL color/rotation,
+init failures), see that repository's `06_TFT_ST7789V3_TROUBLESHOOTING_KR.md`.
+
 ---
 
 If you run into trouble → this lab's own troubleshooting document (to be written) or

@@ -341,6 +341,8 @@ west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/13_uart_bridge/la
    - `3 0` → confirm that line disappears again
    - `9` (an undefined command) → confirm `[M4] unknown command: "9" (...)` prints immediately on M4's console, and nothing is sent to M55 (M55's log should show no reaction at all)
    - `4 1` → confirm `periodic avg ...` starts printing again
+<img width="435" height="605" alt="image" src="https://github.com/user-attachments/assets/3f4d4819-b2e0-41fa-b165-14f555f1c65c" />
+
 
    If typing any digit produces not even an `unknown command` message on M4's console, the problem lies upstream of command parsing — somewhere between the terminal and `uart_poll_in()`. Check that your terminal program's flow control is set to `none` and that a line ending (CR or LF) is actually being transmitted.
 

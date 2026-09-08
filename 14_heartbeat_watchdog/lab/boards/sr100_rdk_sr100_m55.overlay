@@ -1,0 +1,60 @@
+#include <zephyr/dt-bindings/gpio/gpio.h>
+
+/* Lab 14 reuses this TFT wiring UNCHANGED from Lab 11/12/13 -- no new
+ * hardware. M55's only job in this lab is drawing the heartbeat/watchdog
+ * status on the same ST7789V3 panel on SPI0. */
+
+/* ipc0 shared-memory-size must match the M4 overlay in remote/boards/ exactly. */
+&ipc0 {
+	shared-memory-size = <0x400>;
+};
+
+/*
+ * This lab doesn't touch M4's I2C0 sensors or M55's shared &i2c1 bus at
+ * all -- there is no sensor reading in Lab 14. &i2c1 is disabled anyway
+ * for consistency with the rest of the curriculum (M55 never uses i2c1
+ * in any lab) and because it's harmless.
+ */
+&i2c1 {
+	status = "disabled";
+};
+
+&gpio_exp0 {
+	status = "disabled";
+};
+
+&ov02c10 {
+	status = "disabled";
+};
+
+/*
+ * ST7789V3 1.69" 240x280 color TFT on M55's SPI0 -- identical setup to
+ * Lab 11/12/13 (same panel, same wiring, same raw-SPI "zds,st7789v"
+ * custom binding). See Lab 11's doc/README for the full rationale (why
+ * raw SPI instead of Zephyr's in-tree display driver, the level-shifter
+ * requirement, the SPI0 FIFO chunking, and the SPI0/UART1 console pin
+ * conflict this creates).
+ */
+&ns16550_uart1 {
+	status = "disabled";
+};
+
+&spi0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+	pinctrl-0 = <&spi_mstr_mosi &spi_mstr_miso &spi_mstr_clk &spi_mstr_cs>;
+	pinctrl-names = "default";
+
+	st7789v_disp: st7789v@0 {
+		compatible = "zds,st7789v";
+		reg = <0>;
+		spi-max-frequency = <4000000>;
+		reset-gpios = <&gpioa 17 GPIO_ACTIVE_LOW>;  /* SoC GPIO17, J24 pin 3 - through level shifter */
+		dc-gpios = <&gpioa 18 GPIO_ACTIVE_HIGH>;    /* SoC GPIO18, J24 pin 4 - through level shifter */
+		width = <240>;
+		height = <280>;
+		x-offset = <0>;
+		y-offset = <20>;
+	};
+};

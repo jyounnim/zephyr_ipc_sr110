@@ -1,0 +1,10 @@
+/* Lab 14 adds no new hardware -- M4 only uses the mbox channel (ipc0,
+ * already enabled by the base board devicetree) and its console UART
+ * (ns16550_uart0, also already enabled by default and used in polling
+ * mode since Lab 13). This lab does not touch I2C0 or any sensors, so
+ * unlike Lab 12/13's M4 overlay, there is no i2c0 setup here at all. */
+
+/* ipc0 shared-memory-size must match the M55 overlay in boards/ exactly. */
+&ipc0 {
+	shared-memory-size = <0x400>;
+};

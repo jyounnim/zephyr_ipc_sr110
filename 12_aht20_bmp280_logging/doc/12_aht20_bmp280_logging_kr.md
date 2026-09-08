@@ -407,6 +407,7 @@ T:23.5C         (빨간색, AHT20 없거나 실패 시 "T:23.5C(bmp)" 또는 "T:
 H:45.2%         (초록색, AHT20 없거나 실패 시 "H:N/A" 또는 "H:ERR")
 P:1013.2hPa     (청록색, BMP280 없거나 실패 시 "P:N/A" 또는 "P:ERR")
 ```
+<img width="323" height="483" alt="image" src="https://github.com/user-attachments/assets/e0fa07ca-313e-477b-b94a-966d3a37290d" />
 
 센서 모듈의 배선을 일부러 흔들거나 뽑아보면(예: SDA 라인을 순간 분리), 몇백ms 안에 해당
 센서 값이 `ERR`로 바뀌는 것을 확인할 수 있습니다 — 이것이 2초 연결 타임아웃과는 별개로,

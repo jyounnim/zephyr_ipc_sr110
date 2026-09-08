@@ -58,7 +58,7 @@ M4와 M55는 물리적으로 같은 I2C1 버스(SCL/SDA 핀)를 공유합니다.
 **조치**: `m4/`와 `m55/`가 워크스페이스 루트의 형제 디렉토리 구조라면 `-DM4_BUILD="../m4"`가 맞습니다. 자세한 원인은 [Lab 01 트러블슈팅 문서](../../01_hello_ipc/doc/01_hello_ipc_troubleshooting_kr.md) 참고.
 
 ```bash
-west build -p always -b sr100_rdk/sr100/m55 ./sr110_ipc/05_button_press_counter/lab -d m55 \
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/05_button_press_counter/lab -d m55 \
     -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
 

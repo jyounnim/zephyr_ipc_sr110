@@ -61,3 +61,19 @@ After fixing both issues above, with only M4's console connected (M55's console 
 - Command `4` pushes a STATUS to M55, and the STATUS line at the bottom of the TFT updates.
 
 **Lab 16 fully verified.**
+
+## 3. Documentation error — telling the reader to "force-stop M4 or unplug M4's power" to test the watchdog
+
+### Symptom
+
+Step 9 of the lecture doc's "Running It and Checking the Results" section instructed the reader to "force M4 to stop (if you have a way to do that without resetting it) or simply unplug M4's power" to make the heartbeat go silent.
+
+### Root Cause
+
+**M4 and M55 are not separate boards — they are two cores on one SoC.** "Unplugging M4's power" or "resetting M4 alone" is not something this hardware can actually do. Lab 14 had already solved exactly this problem correctly, with a `1 <seconds>` command that pauses only the `Heartbeat_Task` thread for N seconds. When Lab 16 was written from scratch, this pattern wasn't carried over, and wording that doesn't match the board's actual structure ("physically stop or disconnect M4") was written in its place instead.
+
+### Fix
+
+Added commands `5 <seconds>` (pause only `Heartbeat_Task`) and `6` (resume immediately) to M4's code, the same way Lab 14 does it. `pause_until_ms` (a 64-bit timestamp, the return type of `k_uptime_get()`) is guarded by a `k_mutex pause_lock`, exactly as in Lab 14 — the other state shared between this lab's four threads is 32-bit and fits an `atomic_t`, but this one value doesn't, for the same reason recorded in Lab 14's own troubleshooting notes. Both the lecture doc and this troubleshooting doc were corrected to say "pause the heartbeat-sending thread with command `5 <seconds>`" instead of "unplug M4's power."
+
+**Lesson**: always keep in mind that this SoC's M4/M55 are two cores on one chip, not two physically separable boards — when documentation wording implies "force-stopping or resetting one core alone," question first whether that's actually possible on this hardware. When writing a new lab, if an earlier lab (here, Lab 14) already solved the same problem correctly, reuse that pattern rather than re-deriving it from scratch.

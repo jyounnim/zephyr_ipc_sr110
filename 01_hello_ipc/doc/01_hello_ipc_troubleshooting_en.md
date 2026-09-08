@@ -25,7 +25,7 @@ This ack path started out as temporary diagnostic scaffolding, but it turned out
 
 Both boards' base dts files have `&i2c1 { status = "okay"; ... }` enabled regardless of application code, so building M4 and M55 together meant **both cores tried to initialize the same physical I2C1 bus as master at boot, simultaneously**. This conflict appears to be what silently caused the M4's `gpio_pin_set_dt()` I2C write to fail (an M55-only build has no such conflict, which is why it worked correctly on its own).
 
-**Fix**: Added `&i2c1 { status = "disabled"; };` to `lab/boards/sr100_rdk_sr100_m55.overlay`, so only the M4 — the core that actually drives the LEDs/button — owns this bus. This fix has been applied identically across the M55 overlays for all of Lab 01 through Lab 18 (safe to do, since none of the other labs touch i2c1 either).
+**Fix**: Added `&i2c1 { status = "disabled"; };` to `lab/boards/sr100_rdk_sr100_m55.overlay`, so only the M4 — the core that actually drives the LEDs/button — owns this bus. This fix has been applied identically across the M55 overlays for all of Lab 01 through Lab 16 (safe to do, since none of the other labs touch i2c1 either).
 
 > Note: this change also disables the `vcc_sd1` regulator (used for the SD card, `gpio_exp0 7`) and camera (`ov02c10`) power control (`gpio_exp0 8/13`) on the M55 side. That's harmless for these IPC labs since none of them use the SD card or camera, but keep it in mind if you ever repurpose this overlay for something else.
 
@@ -52,7 +52,7 @@ FAILED: .../gpio_pcal64xxa.c.obj
 };
 ```
 
-(`ov02c10` is the camera sensor node present in the M55 base dts; it's disabled for the same reason.) This has been applied across all M55 overlays for Lab 01 through Lab 18.
+(`ov02c10` is the camera sensor node present in the M55 base dts; it's disabled for the same reason.) This has been applied across all M55 overlays for Lab 01 through Lab 16.
 
 ## Resolved Issue 3 — What `M4_BUILD`'s relative path is resolved against
 

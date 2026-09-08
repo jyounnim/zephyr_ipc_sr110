@@ -89,7 +89,7 @@ Lab 15 blocked indefinitely with `K_FOREVER` ("absence of a message carries no m
 
 Lab 15's M55, when nothing was happening, blocked on `K_FOREVER` and let Zephyr's idle thread put the CPU into a WFI low-power wait. This lab must wake up every 500ms to check the clock for the watchdog, so it cannot stay in as deep an idle state as Lab 15. This is not a bug — it is a **deliberate design tradeoff**: wanting safety supervision (a watchdog) means accepting some amount of periodic wakeup as its cost. This lab names that tradeoff instead of hiding it.
 
-### 6. Three of four commands are M4-local, one is relayed — Lab 13's principle, once more
+### 6. Five of six commands are M4-local, one is relayed — Lab 13's principle, once more
 
 | Command | Meaning | Relayed to M55? |
 |---|---|---|
@@ -97,8 +97,12 @@ Lab 15's M55, when nothing was happening, blocked on `K_FOREVER` and let Zephyr'
 | `2 <milli-g>` | Set the MOTION (acceleration) threshold | No (M4-local, same as Lab 10) |
 | `3` | Print everything M4 currently knows (ENV/MOTION/heartbeat/uptime) to M4's own console | No (M4-local, same as Lab 14) |
 | `4` | Push a full snapshot to M55 right now as `IPC16_MSG_STATUS` | **Yes — the one command in this lab that is relayed** |
+| `5 <seconds>` | Pause only `Heartbeat_Task` for N seconds (stop sending heartbeats) — same as Lab 14's command `1` | No (M4-local) |
+| `6` | Resume a paused heartbeat immediately — same as Lab 14's command `2` | No (M4-local) |
 
-Setting or locally querying thresholds (1/2/3) is purely M4's own business and has nothing to do with M55. `4` is the exception because "force the latest snapshot onto M55's screen right now" is a request that only means something once it reaches M55. Lab 13's principle — that whether a command needs to reach the other core is a per-command decision, not an all-or-nothing rule — is confirmed once again here, this time landing on exactly 1 of 4 commands.
+Setting or locally querying thresholds (1/2/3) is purely M4's own business and has nothing to do with M55. `4` is the exception because "force the latest snapshot onto M55's screen right now" is a request that only means something once it reaches M55. Lab 13's principle — that whether a command needs to reach the other core is a per-command decision, not an all-or-nothing rule — is confirmed once again here, this time landing on exactly 1 of 6 commands.
+
+Commands `5`/`6` exist to demonstrate the watchdog. **M4 and M55 are not two separate boards — they are two cores on one chip, so there is no way to power-cycle or reset M4 alone.** As in Lab 14, a "hang" is simulated by pausing exactly one thread, `Heartbeat_Task`, for N seconds: M4's console (and everything else on M4, including `Env_Task`/`Motion_Task`/`Uart_Cmd_Task`) stays fully alive; only the heartbeat send stops. From M55's point of view this is indistinguishable from a real hang over mbox, which is all that's needed to exercise the watchdog timeout path.
 
 ## Architecture Diagram
 
@@ -192,7 +196,7 @@ west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/16_capstone_gatew
 6. Shake or tilt the board -- the TFT's MOTION badge turns red "MOTION!", then returns to green "MOTION OK" a moment after the motion stops.
 7. Type `4` into M4's console -- M4's console prints `STATUS pushed to M55`, and the STATUS line at the bottom of the TFT updates to something like `STATUS:#1 up=NNs`. Typing `4` again bumps the counter to `#2`.
 8. Change the thresholds from M4's console with `1 <celsius>`/`2 <milli-g>`, and confirm the ENV/MOTION badges react against the new thresholds.
-9. **Checking the watchdog**: this lab has no "deliberately hang" command like Lab 14's. Instead, force M4 to stop (if you have a way to do that without resetting it) or simply unplug M4's power to make the heartbeat go silent -- after 4 seconds (`WATCHDOG_TIMEOUT_MS`), confirm the TFT's watchdog badge turns red "TIMEOUT" and the TRIPS count increments by 1.
+9. **Checking the watchdog**: type `5 5` into M4's console to pause `Heartbeat_Task` for 5 seconds (M4 and M55 are just two cores on one chip, so M4 can't be power-cycled or reset on its own -- as in Lab 14, only the sending thread is paused to simulate the heartbeat going silent). After 4 seconds (`WATCHDOG_TIMEOUT_MS`), confirm the TFT's watchdog badge turns red "TIMEOUT" and the TRIPS count increments by 1. Once the 5 seconds elapse, the heartbeat resumes automatically and the badge returns to green "OK". Typing `6` cancels the pause and resumes immediately instead of waiting it out.
 
 ## Summary
 

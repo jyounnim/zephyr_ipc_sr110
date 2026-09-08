@@ -179,10 +179,10 @@ M55 쪽 오버레이에는 이 외에도 `&i2c1`, `&gpio_exp0`, `&ov02c10`을 `s
 
 ```bash
 # 1) M4 (remote) 이미지 빌드
-west build -p always -b sr100_rdk/sr100/m4 ./sr110_ipc/01_hello_ipc/lab/remote -d m4
+west build -p always -b sr100_rdk/sr100/m4 ./zephyr_ipc_sr110/01_hello_ipc/lab/remote -d m4
 
 # 2) M55 (host) 이미지 빌드 — M4 바이너리를 포함
-west build -p always -b sr100_rdk/sr100/m55 ./sr110_ipc/01_hello_ipc/lab -d m55 \
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/01_hello_ipc/lab -d m55 \
     -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
 

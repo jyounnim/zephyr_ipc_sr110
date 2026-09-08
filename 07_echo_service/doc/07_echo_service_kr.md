@@ -172,10 +172,10 @@ west 워크스페이스 루트에서 M4(remote)를 먼저 빌드한 뒤, 그 결
 
 ```bash
 # 1) M4 (remote) 이미지 빌드
-west build -p always -b sr100_rdk/sr100/m4 ./sr110_ipc/07_echo_service/lab/remote -d m4
+west build -p always -b sr100_rdk/sr100/m4 ./zephyr_ipc_sr110/07_echo_service/lab/remote -d m4
 
 # 2) M55 (host) 이미지 빌드 — M4 바이너리를 M4_BUILD로 포함
-west build -p always -b sr100_rdk/sr100/m55 ./sr110_ipc/07_echo_service/lab -d m55 \
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/07_echo_service/lab -d m55 \
     -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
 

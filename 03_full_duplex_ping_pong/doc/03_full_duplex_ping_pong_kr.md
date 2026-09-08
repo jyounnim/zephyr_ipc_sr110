@@ -192,10 +192,10 @@ seq 번호 하나만 실어 보내며, M4는 받은 seq를 그대로 pong에 담
 
 ```bash
 # 1) M4(remote)
-west build -p always -b sr100_rdk/sr100/m4 ./sr110_ipc/03_full_duplex_ping_pong/lab/remote -d m4
+west build -p always -b sr100_rdk/sr100/m4 ./zephyr_ipc_sr110/03_full_duplex_ping_pong/lab/remote -d m4
 
 # 2) M55(host, M4 바이너리를 M4_BUILD로 포함)
-west build -p always -b sr100_rdk/sr100/m55 ./sr110_ipc/03_full_duplex_ping_pong/lab -d m55 \
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/03_full_duplex_ping_pong/lab -d m55 \
     -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
 

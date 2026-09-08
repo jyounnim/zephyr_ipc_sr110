@@ -557,8 +557,18 @@ static void motion_task_entry(void *p1, void *p2, void *p3)
 /* ======================================================= HEARTBEAT_TASK */
 
 #define HEARTBEAT_PERIOD_MS 1000
+#define PAUSE_SECONDS_MIN   1
+#define PAUSE_SECONDS_MAX   60
 
 static atomic_t g_heartbeat_seq = ATOMIC_INIT(0);
+
+/* Guards pause_until_ms, the only piece of state shared between
+ * Uart_Cmd_Task (writer) and Heartbeat_Task (reader) -- same pattern as
+ * Lab 14. A plain mutex is used rather than an atomic_t because the value
+ * is a 64-bit uptime timestamp (k_uptime_get()'s return type), which does
+ * not fit in a single atomic_t on this platform. */
+static struct k_mutex pause_lock;
+static int64_t pause_until_ms;   /* 0 = not paused */
 
 #define HEARTBEAT_TASK_STACK_SIZE 512
 #define HEARTBEAT_TASK_PRIORITY   5
@@ -575,13 +585,27 @@ static void heartbeat_task_entry(void *p1, void *p2, void *p3)
 	LOG_INF("[Heartbeat_Task] started");
 
 	while (1) {
-		uint32_t seq = (uint32_t)atomic_add(&g_heartbeat_seq, 1) + 1;
-		struct ipc16_msg msg = {
-			.type = IPC16_MSG_HEARTBEAT,
-			.payload.heartbeat = {.seq = seq},
-		};
+		bool paused;
 
-		send_msg(&msg);
+		k_mutex_lock(&pause_lock, K_FOREVER);
+		if (pause_until_ms != 0 && k_uptime_get() >= pause_until_ms) {
+			/* Pause window expired -- auto-clear so a forgotten
+			 * "resume" isn't required. */
+			pause_until_ms = 0;
+		}
+		paused = (pause_until_ms != 0);
+		k_mutex_unlock(&pause_lock);
+
+		if (!paused) {
+			uint32_t seq = (uint32_t)atomic_add(&g_heartbeat_seq, 1) + 1;
+			struct ipc16_msg msg = {
+				.type = IPC16_MSG_HEARTBEAT,
+				.payload.heartbeat = {.seq = seq},
+			};
+
+			send_msg(&msg);
+		}
+
 		k_msleep(HEARTBEAT_PERIOD_MS);
 	}
 }
@@ -680,8 +704,43 @@ static void handle_command(const char *line)
 		return;
 	}
 
+	/* "5 <seconds>" -- M4-local: pause Heartbeat_Task for N seconds, same
+	 * mechanism as Lab 14's command 1. M4 and M55 are two cores on the
+	 * SAME chip -- there is no separate M4 "board" to power-cycle or
+	 * reset in isolation, so simulating a hang by pausing the sending
+	 * thread (while the rest of M4, including this console, stays
+	 * alive) is the only repeatable way to exercise M55's watchdog
+	 * timeout path on this hardware. */
+	if (sscanf(line, "5 %d", &arg) == 1) {
+		if (arg < PAUSE_SECONDS_MIN || arg > PAUSE_SECONDS_MAX) {
+			printk("[M4] pause seconds must be %d..%d\n",
+			       PAUSE_SECONDS_MIN, PAUSE_SECONDS_MAX);
+			return;
+		}
+		k_mutex_lock(&pause_lock, K_FOREVER);
+		pause_until_ms = k_uptime_get() + (int64_t)arg * 1000;
+		k_mutex_unlock(&pause_lock);
+		printk("[M4] heartbeat PAUSED for %ds (simulated hang) -- watch M55's TFT "
+		       "watchdog badge\n", arg);
+		return;
+	}
+
+	/* "6" -- M4-local: resume Heartbeat_Task immediately (same as
+	 * Lab 14's command 2). */
+	if (strcmp(line, "6") == 0) {
+		bool was_paused;
+
+		k_mutex_lock(&pause_lock, K_FOREVER);
+		was_paused = (pause_until_ms != 0);
+		pause_until_ms = 0;
+		k_mutex_unlock(&pause_lock);
+		printk("[M4] heartbeat RESUMED%s\n", was_paused ? "" : " (was not paused)");
+		return;
+	}
+
 	printk("[M4] unknown command: \"%s\" (try: 1 <celsius>=ENV threshold, "
-	       "2 <milli-g>=MOTION threshold, 3=local status, 4=push STATUS to M55)\n",
+	       "2 <milli-g>=MOTION threshold, 3=local status, 4=push STATUS to M55, "
+	       "5 <seconds>=pause heartbeat (simulate hang), 6=resume heartbeat)\n",
 	       line);
 }
 
@@ -695,8 +754,8 @@ static void uart_cmd_task_entry(void *p1, void *p2, void *p3)
 	ARG_UNUSED(p2);
 	ARG_UNUSED(p3);
 
-	LOG_INF("[Uart_Cmd_Task] started -- type 1 <celsius>, 2 <milli-g>, 3, or 4 "
-		"into this console and press Enter");
+	LOG_INF("[Uart_Cmd_Task] started -- type 1 <celsius>, 2 <milli-g>, 3, 4, "
+		"5 <seconds>, or 6 into this console and press Enter");
 
 	while (1) {
 		if (uart_poll_in(console_dev, &c) != 0) {
@@ -726,6 +785,7 @@ int main(void)
 	k_mutex_init(&tx_lock);
 	k_mutex_init(&env_lock);
 	k_mutex_init(&motion_lock);
+	k_mutex_init(&pause_lock);
 
 	tx_channel = (struct mbox_dt_spec)MBOX_DT_SPEC_GET(DT_PATH(mbox_consumer), tx);
 

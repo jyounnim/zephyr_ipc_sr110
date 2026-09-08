@@ -172,10 +172,10 @@ From the west workspace root, build M4 (remote) first, then build M55 (host), in
 
 ```bash
 # 1) Build the M4 (remote) image
-west build -p always -b sr100_rdk/sr100/m4 ./sr110_ipc/07_echo_service/lab/remote -d m4
+west build -p always -b sr100_rdk/sr100/m4 ./zephyr_ipc_sr110/07_echo_service/lab/remote -d m4
 
 # 2) Build the M55 (host) image — include the M4 binary via M4_BUILD
-west build -p always -b sr100_rdk/sr100/m55 ./sr110_ipc/07_echo_service/lab -d m55 \
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/07_echo_service/lab -d m55 \
     -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
 

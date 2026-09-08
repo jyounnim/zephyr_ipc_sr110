@@ -253,10 +253,10 @@ M4와 M55는 물리적으로 같은 I2C1 버스(SCL/SDA 핀)를 공유합니다.
 
 ```bash
 # 1) M4(remote)
-west build -p always -b sr100_rdk/sr100/m4 ./sr110_ipc/02_button_pong/lab/remote -d m4
+west build -p always -b sr100_rdk/sr100/m4 ./zephyr_ipc_sr110/02_button_pong/lab/remote -d m4
 
 # 2) M55(host, M4 바이너리를 M4_BUILD로 포함)
-west build -p always -b sr100_rdk/sr100/m55 ./sr110_ipc/02_button_pong/lab -d m55 \
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/02_button_pong/lab -d m55 \
     -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
 

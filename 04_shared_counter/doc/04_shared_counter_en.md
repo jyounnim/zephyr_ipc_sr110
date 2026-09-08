@@ -163,10 +163,10 @@ On the M4 side, all that's needed is to match the `shared-memory-size` value wit
 
 ```bash
 # 1) Build M4 (remote) first
-west build -p always -b sr100_rdk/sr100/m4 ./sr110_ipc/04_shared_counter/lab/remote -d m4
+west build -p always -b sr100_rdk/sr100/m4 ./zephyr_ipc_sr110/04_shared_counter/lab/remote -d m4
 
 # 2) Build M55 (host, embedding the M4 binary via M4_BUILD)
-west build -p always -b sr100_rdk/sr100/m55 ./sr110_ipc/04_shared_counter/lab -d m55 \
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/04_shared_counter/lab -d m55 \
     -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
 

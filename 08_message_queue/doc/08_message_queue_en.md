@@ -183,10 +183,10 @@ Build the M4 (remote) image first, then build the M55 (host) image so that it re
 
 ```bash
 # 1) Build the M4 (remote) image
-west build -p always -b sr100_rdk/sr100/m4 ./sr110_ipc/08_message_queue/lab/remote -d m4
+west build -p always -b sr100_rdk/sr100/m4 ./zephyr_ipc_sr110/08_message_queue/lab/remote -d m4
 
 # 2) Build the M55 (host) image — includes the M4 binary
-west build -p always -b sr100_rdk/sr100/m55 ./sr110_ipc/08_message_queue/lab -d m55 \
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/08_message_queue/lab -d m55 \
     -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
 

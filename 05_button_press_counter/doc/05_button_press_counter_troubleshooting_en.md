@@ -58,7 +58,7 @@ See the [Lab 01 troubleshooting document](../../01_hello_ipc/doc/01_hello_ipc_tr
 **Fix**: If `m4/` and `m55/` are sibling directories under the workspace root, `-DM4_BUILD="../m4"` is correct. See the [Lab 01 troubleshooting document](../../01_hello_ipc/doc/01_hello_ipc_troubleshooting_en.md) for the detailed root cause.
 
 ```bash
-west build -p always -b sr100_rdk/sr100/m55 ./sr110_ipc/05_button_press_counter/lab -d m55 \
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/05_button_press_counter/lab -d m55 \
     -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
 

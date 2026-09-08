@@ -151,10 +151,10 @@ M55 오버레이(`lab/boards/sr100_rdk_sr100_m55.overlay`)에서는 M4와 M55가
 
 ```bash
 # 1) M4(remote)
-west build -p always -b sr100_rdk/sr100/m4 ./sr110_ipc/10_threshold_event/lab/remote -d m4
+west build -p always -b sr100_rdk/sr100/m4 ./zephyr_ipc_sr110/10_threshold_event/lab/remote -d m4
 
 # 2) M55(host, M4 바이너리를 M4_BUILD로 포함)
-west build -p always -b sr100_rdk/sr100/m55 ./sr110_ipc/10_threshold_event/lab -d m55 \
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/10_threshold_event/lab -d m55 \
     -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
 

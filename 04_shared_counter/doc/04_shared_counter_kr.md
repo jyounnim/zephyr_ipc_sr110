@@ -163,10 +163,10 @@ M4 쪽은 `shared-memory-size` 값만 M55와 맞춰주면 됩니다. LED0는 M4�
 
 ```bash
 # 1) M4(remote) 먼저 빌드
-west build -p always -b sr100_rdk/sr100/m4 ./sr110_ipc/04_shared_counter/lab/remote -d m4
+west build -p always -b sr100_rdk/sr100/m4 ./zephyr_ipc_sr110/04_shared_counter/lab/remote -d m4
 
 # 2) M55(host, M4 바이너리를 M4_BUILD로 포함)
-west build -p always -b sr100_rdk/sr100/m55 ./sr110_ipc/04_shared_counter/lab -d m55 \
+west build -p always -b sr100_rdk/sr100/m55 ./zephyr_ipc_sr110/04_shared_counter/lab -d m55 \
     -DCONFIG_SR100_RELEASE_M4_RESET=y -DM4_BUILD="../m4"
 ```
 
